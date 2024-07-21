@@ -1,0 +1,25 @@
+services:
+  garage:
+    build: ./
+    container_name: DocDoc
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/usr/src/app/src
+      - ./libs:/usr/src/app/libs
+    env_file:
+      - .env
+    command: npm run start
+    depends_on:
+      - garage-mongo
+    dns:
+      - 8.8.8.8 # Google DNS
+      - 8.8.4.4 # Google DNS
+
+  garage-mongo:
+    image: mongo:latest
+    container_name: garage-mongo
+    attach: false
+    restart: always
+    ports:
+      - '27017:27017'
