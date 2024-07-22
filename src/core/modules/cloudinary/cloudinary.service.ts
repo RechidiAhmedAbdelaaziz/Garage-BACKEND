@@ -14,9 +14,6 @@ export class CloudinaryService {
     }
 
     uploadImage = async (file: Express.Multer.File) => {
-        console.log('image', file.path)
-
-
         const result = await cloudinary.uploader
             .upload(
                 file.path,

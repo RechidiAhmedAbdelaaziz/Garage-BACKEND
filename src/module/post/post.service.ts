@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model, Schema, Types } from 'mongoose';
 import { Post } from 'src/models/post';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import { Pagination } from 'src/core/helper/pagination.helper';
+import { CloudinaryService } from '../../core/modules/cloudinary/cloudinary.service';
+import { Pagination } from 'src/core/helpers/pagination.helper';
 
 @Injectable()
 export class PostService {
@@ -15,18 +15,16 @@ export class PostService {
 
     createPost = async (details: {
         title: string,
-        priceBefore?: number,
-        priceAfter: number,
+        price: number,
         image?: Express.Multer.File
     }) => {
 
-        const { title, priceBefore, priceAfter, image } = details;
+        const { title, price, image } = details;
 
         const post = new this.postModel();
 
         post.title = title;
-        post.priceBefore = priceBefore;
-        post.priceAfter = priceAfter;
+        post.priceAfter = price;
 
         post.imgUrl = image ? (await this.cloudinaryService.uploadImage(image)).url : undefined
 
@@ -56,6 +54,42 @@ export class PostService {
             .limit(limit);
 
         return await generate(posts)
+    }
+
+    getPost = async (id: Schema.Types.ObjectId) => {
+        const post = await this.postModel.findById(id);
+
+        if (!post) throw new HttpException('Post not found', 404);
+
+        return post;
+    }
+
+    editPost = async (id: Schema.Types.ObjectId, details: {
+        newPrice?: number,
+        newTitle?: string,
+        newImage?: Express.Multer.File
+    }) => {
+        const { newPrice, newImage, newTitle } = details;
+        const post = await this.postModel.findById(id);
+
+        if (!post) throw new HttpException('Post not found', 404);
+
+        if (newPrice) {
+            post.priceBefore = post.priceAfter;
+            post.priceAfter = newPrice;
+        }
+
+        if (newImage) post.imgUrl = (await this.cloudinaryService.uploadImage(newImage)).url
+
+        if (newTitle) post.title = newTitle;
+
+        return await post.save();
+    }
+
+    deletePost = async (id: Schema.Types.ObjectId) => {
+        const post = await this.postModel.findByIdAndDelete(id);
+
+        if (!post) throw new HttpException('Post not found', 404);
     }
 
 

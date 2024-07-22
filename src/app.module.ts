@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PostModule } from './module/post/post.module';
-import { CloudinaryModule } from './module/cloudinary/cloudinary.module';
+import { CloudinaryModule } from './core/modules/cloudinary/cloudinary.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MulterModule } from '@nestjs/platform-express';
 
